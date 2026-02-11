@@ -1,7 +1,8 @@
 site_name: Freqtrade Operator
-site_url: https://your-username.github.io/freqtrade-operator
-repo_url: https://github.com/your-username/freqtrade-operator
+site_url: https://jaykay.github.io/freqtrade_operator/
+repo_url: https://github.com/jaykay/freqtrade_operator
 edit_uri: edit/main/docs/
+use_directory_urls: true
 
 theme:
   name: material
