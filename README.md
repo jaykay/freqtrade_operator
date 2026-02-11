@@ -1,3 +1,14 @@
+> [!CAUTION]
+> **DISCLAIMER: FOR DEMONSTRATION PURPOSES ONLY**
+> 
+> This software is provided for educational and demonstration purposes only. It is **NOT** intended for production trading with real money.
+> 
+> Trading cryptocurrencies involves significant risk and can result in the loss of your capital. You should not invest more than you can afford to lose and you should ensure that you fully understand the risks involved.
+> 
+> The authors and contributors of this project accept **NO RESPONSIBILITY** for any financial losses, damages, or legal consequences resulting from the use of this software. By using this software, you agree that you are solely responsible for your own trading decisions and actions.
+> 
+> **USE AT YOUR OWN RISK.**
+
 # Freqtrade Operator
 
 A Kubernetes operator for managing [Freqtrade](https://www.freqtrade.io/) trading bot instances with centralized management, automated strategy synchronization, and comprehensive observability.
