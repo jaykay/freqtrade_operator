@@ -1,12 +1,12 @@
 > [!CAUTION]
 > **DISCLAIMER: FOR DEMONSTRATION PURPOSES ONLY**
-> 
+>
 > This software is provided for educational and demonstration purposes only. It is **NOT** intended for production trading with real money.
-> 
+>
 > Trading cryptocurrencies involves significant risk and can result in the loss of your capital. You should not invest more than you can afford to lose and you should ensure that you fully understand the risks involved.
-> 
+>
 > The authors and contributors of this project accept **NO RESPONSIBILITY** for any financial losses, damages, or legal consequences resulting from the use of this software. By using this software, you agree that you are solely responsible for your own trading decisions and actions.
-> 
+>
 > **USE AT YOUR OWN RISK.**
 
 # Freqtrade Operator
@@ -160,10 +160,7 @@ kubectl apply -f docs/examples/simple-bot.yaml
 
 1. **Install dependencies**:
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-pip install -e ".[dev]"
+uv sync --all-extras --dev
 ```
 
 2. **Apply CRDs**:
@@ -173,7 +170,7 @@ kubectl apply -f deploy/crds/
 
 3. **Run operator locally**:
 ```bash
-kopf run src/operator/main.py --verbose
+uv run kopf run src/freqtrade_operator/main.py --verbose
 ```
 
 ## Configuration

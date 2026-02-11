@@ -13,21 +13,21 @@ def create_deployment(
     owner_references: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Create Deployment resource for a Freqtrade bot.
-    
+
     Args:
         name: Bot instance name
         namespace: Namespace
         spec: FreqtradeBot spec
         api_port: Assigned API server port
         owner_references: Owner references for garbage collection
-    
+
     Returns:
         Deployment resource dict
     """
     exchange_config = spec["exchange"]
     resources = spec.get("resources", {})
     strategies = spec.get("strategies", [])
-    
+
     # Build containers
     containers = [
         {
@@ -36,8 +36,10 @@ def create_deployment(
             "command": ["freqtrade"],
             "args": [
                 "trade",
-                "--config", "/config/config.json",
-                "--strategy-path", "/strategies",
+                "--config",
+                "/config/config.json",
+                "--strategy-path",
+                "/strategies",
             ],
             "env": [
                 {
@@ -48,7 +50,7 @@ def create_deployment(
                             "key": "api-key",
                             "optional": True,
                         }
-                    }
+                    },
                 },
                 {
                     "name": "EXCHANGE_API_SECRET",
@@ -58,7 +60,7 @@ def create_deployment(
                             "key": "api-secret",
                             "optional": True,
                         }
-                    }
+                    },
                 },
                 {
                     "name": "API_USERNAME",
@@ -71,7 +73,7 @@ def create_deployment(
                             "name": f"{name}-api",
                             "key": "password",
                         }
-                    }
+                    },
                 },
                 {
                     "name": "JWT_SECRET_KEY",
@@ -80,7 +82,7 @@ def create_deployment(
                             "name": f"{name}-api",
                             "key": "jwt-secret",
                         }
-                    }
+                    },
                 },
             ],
             "ports": [
@@ -123,12 +125,12 @@ def create_deployment(
             "resources": resources,
         }
     ]
-    
+
     # Add git-sync sidecar for each strategy
     for strategy in strategies:
         git_sync_container = create_git_sync_container(strategy, volume_name="strategies")
         containers.append(git_sync_container)
-    
+
     # Build volumes
     volumes = [
         {
@@ -146,14 +148,14 @@ def create_deployment(
             "emptyDir": {},
         },
     ]
-    
+
     # Add SSH key volume if any strategy uses it
     for strategy in strategies:
         ssh_key_secret = strategy.get("gitRepository", {}).get("sshKeySecret")
         if ssh_key_secret:
             volumes.append(create_ssh_key_volume(ssh_key_secret))
             break  # Only need one SSH key volume
-    
+
     return {
         "apiVersion": "apps/v1",
         "kind": "Deployment",

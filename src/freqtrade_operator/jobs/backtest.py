@@ -12,7 +12,7 @@ def create_backtest_job(
     owner_references: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Create a Kubernetes Job for backtesting.
-    
+
     Args:
         name: Job name
         namespace: Namespace
@@ -20,7 +20,7 @@ def create_backtest_job(
         strategy_name: Strategy to backtest
         timerange: Timerange for backtest (e.g., "20230101-20230201")
         owner_references: Owner references
-    
+
     Returns:
         Job resource dict
     """
@@ -54,10 +54,14 @@ def create_backtest_job(
                             "command": ["freqtrade"],
                             "args": [
                                 "backtesting",
-                                "--config", "/config/config.json",
-                                "--strategy", strategy_name,
-                                "--timerange", timerange,
-                                "--strategy-path", "/strategies",
+                                "--config",
+                                "/config/config.json",
+                                "--strategy",
+                                strategy_name,
+                                "--timerange",
+                                timerange,
+                                "--strategy-path",
+                                "/strategies",
                             ],
                             "volumeMounts": [
                                 {

@@ -40,7 +40,7 @@ spec:
                       type: boolean
                       default: true
                       description: Enable Freqtrade dry-run mode for paper trading
-                
+
                 # Stake configuration
                 stake:
                   type: object
@@ -57,7 +57,7 @@ spec:
                       enum: [unlimited, limited]
                       default: limited
                       description: Stake strategy
-                
+
                 # Strategy configuration
                 strategies:
                   type: array
@@ -92,7 +92,7 @@ spec:
                         minimum: 1
                         default: 1
                         description: Strategy weight for multi-strategy allocation
-                
+
                 # API Server configuration
                 apiServer:
                   type: object
@@ -106,7 +106,7 @@ spec:
                       enum: [error, info, debug]
                       default: info
                       description: API server verbosity level
-                
+
                 # Webhook configuration
                 webhooks:
                   type: array
@@ -126,7 +126,7 @@ spec:
                       secretRef:
                         type: string
                         description: Secret for webhook authentication
-                
+
                 # Resources
                 resources:
                   type: object
@@ -149,13 +149,13 @@ spec:
                         memory:
                           type: string
                           default: "512Mi"
-                
+
                 # Dry-run mode for operator validation
                 dryRun:
                   type: boolean
                   default: false
                   description: Operator dry-run mode - validate without deploying
-            
+
             status:
               type: object
               properties:

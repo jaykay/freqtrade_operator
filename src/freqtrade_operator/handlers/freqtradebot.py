@@ -6,15 +6,14 @@ import string
 from typing import Any
 
 import kopf
-from kubernetes import client
-from kubernetes.client.rest import ApiException
-
 from freqtrade_operator.resources.configmap import create_configmap
 from freqtrade_operator.resources.database import (
     create_database,
     get_database_connection_string,
 )
 from freqtrade_operator.resources.deployment import create_deployment
+from kubernetes import client
+from kubernetes.client.rest import ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -46,17 +45,17 @@ def create_freqtradebot(
 ) -> dict[str, str]:
     """Handle FreqtradeBot creation."""
     logger.info(f"Creating FreqtradeBot: {namespace}/{name}")
-    
+
     # Check for operator dry-run mode
     if spec.get("dryRun", False):
         logger.info(f"Operator dry-run mode enabled for {name}, skipping deployment")
         return {"message": "Operator dry-run mode - validation only"}
-    
+
     # Create Kubernetes API clients
     core_v1 = client.CoreV1Api()
     apps_v1 = client.AppsV1Api()
     custom_api = client.CustomObjectsApi()
-    
+
     # Owner reference for garbage collection
     owner_references = [
         {
@@ -68,7 +67,7 @@ def create_freqtradebot(
             "blockOwnerDeletion": True,
         }
     ]
-    
+
     try:
         # 1. Create API server secret
         api_secret_dict = {
@@ -86,11 +85,11 @@ def create_freqtradebot(
         kopf.adopt(api_secret_dict, owner=kwargs.get("body"))
         core_v1.create_namespaced_secret(namespace=namespace, body=api_secret_dict)
         logger.info(f"Created API secret for {name}")
-        
+
         # 2. Create database (CNPG)
         cluster_name = "freqtrade-db"  # Default cluster name
         database_name = name.replace("-", "_")
-        
+
         db_resource = create_database(name, namespace, cluster_name, owner_references)
         try:
             custom_api.create_namespaced_custom_object(
@@ -109,39 +108,33 @@ def create_freqtradebot(
                 )
             else:
                 raise
-        
+
         # 3. Assign API port and create ConfigMap
         api_port = assign_api_port(name)
-        db_url = get_database_connection_string(
-            cluster_name, namespace, database_name
-        )
-        
-        configmap_dict = create_configmap(
-            name, namespace, spec, api_port, db_url, owner_references
-        )
+        db_url = get_database_connection_string(cluster_name, namespace, database_name)
+
+        configmap_dict = create_configmap(name, namespace, spec, api_port, db_url, owner_references)
         kopf.adopt(configmap_dict, owner=kwargs.get("body"))
-        
+
         core_v1.create_namespaced_config_map(
             namespace=namespace,
             body=configmap_dict,
         )
         logger.info(f"Created ConfigMap for {name}")
-        
+
         # 4. Create Deployment using kopf.adopt for owner references
-        deployment_dict = create_deployment(
-            name, namespace, spec, api_port, owner_references
-        )
-        
+        deployment_dict = create_deployment(name, namespace, spec, api_port, owner_references)
+
         # Use kopf.adopt to set owner references properly
         kopf.adopt(deployment_dict, owner=kwargs.get("body"))
-        
+
         # Create deployment using CustomObjectsApi to avoid object conversion issues
         apps_v1.create_namespaced_deployment(
             namespace=namespace,
             body=deployment_dict,
         )
         logger.info(f"Created Deployment for {name}")
-        
+
         # 5. Create Service
         service_dict = {
             "apiVersion": "v1",
@@ -167,12 +160,12 @@ def create_freqtradebot(
         kopf.adopt(service_dict, owner=kwargs.get("body"))
         core_v1.create_namespaced_service(namespace=namespace, body=service_dict)
         logger.info(f"Created Service for {name}")
-        
+
         return {
             "message": f"FreqtradeBot {name} created successfully",
             "apiPort": str(api_port),
         }
-        
+
     except ApiException as e:
         logger.error(f"Failed to create resources for {name}: {e}")
         raise kopf.PermanentError(f"Failed to create bot: {e}")
@@ -189,11 +182,11 @@ def update_freqtradebot(
 ) -> dict[str, str]:
     """Handle FreqtradeBot updates."""
     logger.info(f"Updating FreqtradeBot: {namespace}/{name}")
-    
+
     # Check if strategies changed
     old_strategies = old.get("spec", {}).get("strategies", [])
     new_strategies = spec.get("strategies", [])
-    
+
     if old_strategies != new_strategies:
         logger.info(f"Strategies changed for {name}, triggering rollout")
         # ConfigMap update will trigger deployment rollout automatically
@@ -208,8 +201,9 @@ def update_freqtradebot(
                         "template": {
                             "metadata": {
                                 "annotations": {
-                                    "kubectl.kubernetes.io/restartedAt": 
-                                    kwargs.get("status", {}).get("create_fn", {}).get("started", "now")
+                                    "kubectl.kubernetes.io/restartedAt": kwargs.get("status", {})
+                                    .get("create_fn", {})
+                                    .get("started", "now")
                                 }
                             }
                         }
@@ -218,7 +212,7 @@ def update_freqtradebot(
             )
         except ApiException as e:
             logger.error(f"Failed to restart deployment {name}: {e}")
-    
+
     return {"message": f"FreqtradeBot {name} updated"}
 
 
@@ -230,10 +224,10 @@ def delete_freqtradebot(
 ) -> dict[str, str]:
     """Handle FreqtradeBot deletion."""
     logger.info(f"Deleting FreqtradeBot: {namespace}/{name}")
-    
+
     # Resources will be automatically deleted via owner references
     # We can add cleanup logic here if needed
-    
+
     return {"message": f"FreqtradeBot {name} deleted"}
 
 

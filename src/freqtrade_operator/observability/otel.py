@@ -1,7 +1,6 @@
 """OpenTelemetry configuration and instrumentation for the operator."""
 
 import logging
-from typing import Optional
 
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
@@ -17,14 +16,14 @@ logger = logging.getLogger(__name__)
 
 def setup_opentelemetry(
     service_name: str = "freqtrade-operator",
-    otlp_endpoint: Optional[str] = None,
+    otlp_endpoint: str | None = None,
 ) -> tuple[trace.Tracer, metrics.Meter]:
     """Set up OpenTelemetry instrumentation.
-    
+
     Args:
         service_name: Name of the service for telemetry
         otlp_endpoint: OTLP collector endpoint (if None, telemetry is disabled)
-    
+
     Returns:
         Tuple of (tracer, meter) for creating spans and metrics
     """
@@ -32,19 +31,21 @@ def setup_opentelemetry(
         logger.info("OTLP endpoint not configured, telemetry disabled")
         # Return no-op tracer and meter
         return trace.get_tracer(__name__), metrics.get_meter(__name__)
-    
+
     # Create resource with service information
-    resource = Resource.create({
-        "service.name": service_name,
-        "service.version": "0.1.0",
-    })
-    
+    resource = Resource.create(
+        {
+            "service.name": service_name,
+            "service.version": "0.1.0",
+        }
+    )
+
     # Set up tracing
     trace_provider = TracerProvider(resource=resource)
     trace_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True)
     trace_provider.add_span_processor(BatchSpanProcessor(trace_exporter))
     trace.set_tracer_provider(trace_provider)
-    
+
     # Set up metrics
     metric_reader = PeriodicExportingMetricReader(
         OTLPMetricExporter(endpoint=otlp_endpoint, insecure=True),
@@ -55,21 +56,21 @@ def setup_opentelemetry(
         metric_readers=[metric_reader],
     )
     metrics.set_meter_provider(meter_provider)
-    
+
     logger.info(f"OpenTelemetry configured with endpoint: {otlp_endpoint}")
-    
+
     tracer = trace.get_tracer(__name__)
     meter = metrics.get_meter(__name__)
-    
+
     return tracer, meter
 
 
 def create_operator_metrics(meter: metrics.Meter) -> dict[str, metrics.Instrument]:
     """Create custom metrics for the operator.
-    
+
     Args:
         meter: OpenTelemetry meter instance
-    
+
     Returns:
         Dictionary of metric instruments
     """

@@ -4,9 +4,8 @@ import logging
 import os
 
 import kopf
-from kubernetes import client, config
-
 from freqtrade_operator.observability.otel import create_operator_metrics, setup_opentelemetry
+from kubernetes import config
 
 # Configure logging
 logging.basicConfig(
@@ -37,7 +36,7 @@ def configure(settings: kopf.OperatorSettings, **_: object) -> None:
     """Configure operator settings on startup."""
     settings.persistence.finalizer = "freqtrade-operator/finalizer"
     settings.posting.level = logging.INFO
-    
+
     # Watch all namespaces by default
     namespace = os.getenv("WATCH_NAMESPACE")
     if namespace:
@@ -45,7 +44,7 @@ def configure(settings: kopf.OperatorSettings, **_: object) -> None:
         logger.info(f"Watching namespace: {namespace}")
     else:
         logger.info("Watching all namespaces")
-    
+
     logger.info("Freqtrade Operator started successfully")
 
 

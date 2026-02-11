@@ -10,13 +10,13 @@ def create_database(
     owner_references: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Create a Database resource for CloudNativePG.
-    
+
     Args:
         name: Bot instance name
         namespace: Namespace
         cluster_name: CNPG cluster name
         owner_references: Owner references
-    
+
     Returns:
         Database resource dict
     """
@@ -49,20 +49,20 @@ def get_database_connection_string(
     username: str = "freqtrade",
 ) -> str:
     """Generate PostgreSQL connection string.
-    
+
     Args:
         cluster_name: CNPG cluster name
         namespace: Namespace
         database_name: Database name
         username: Database username
-    
+
     Returns:
         Connection string with environment variable placeholders
     """
     # Use cluster service for connection
     host = f"{cluster_name}-rw.{namespace}.svc.cluster.local"
     port = 5432
-    
+
     return f"postgresql://{username}:${{DB_PASSWORD}}@{host}:{port}/{database_name}"
 
 
@@ -73,16 +73,16 @@ def create_database_secret(
     owner_references: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Create a secret for database credentials.
-    
+
     Note: This creates a placeholder secret. The actual password
     should be injected from the CNPG cluster's app user secret.
-    
+
     Args:
         name: Bot instance name
         namespace: Namespace
         cluster_name: CNPG cluster name
         owner_references: Owner references
-    
+
     Returns:
         Secret resource dict
     """

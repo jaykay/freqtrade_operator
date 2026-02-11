@@ -5,7 +5,6 @@ from typing import Any
 
 import kopf
 from kubernetes import client
-from kubernetes.client.rest import ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +19,13 @@ def create_webserver(
 ) -> dict[str, str]:
     """Handle FreqtradeWebserver creation."""
     logger.info(f"Creating FreqtradeWebserver: {namespace}/{name}")
-    
+
     apps_v1 = client.AppsV1Api()
     core_v1 = client.CoreV1Api()
     networking_v1 = client.NetworkingV1Api()
-    
+
     ingress_spec = spec["ingress"]
-    
+
     # Create deployment for FreqUI
     deployment = client.V1Deployment(
         metadata=client.V1ObjectMeta(
@@ -72,7 +71,7 @@ def create_webserver(
     )
     apps_v1.create_namespaced_deployment(namespace, deployment)
     logger.info(f"Created FreqUI deployment for {name}")
-    
+
     # Create service
     service = client.V1Service(
         metadata=client.V1ObjectMeta(
@@ -102,7 +101,7 @@ def create_webserver(
     )
     core_v1.create_namespaced_service(namespace, service)
     logger.info(f"Created service for {name}")
-    
+
     # Create ingress
     ingress = client.V1Ingress(
         metadata=client.V1ObjectMeta(
@@ -143,9 +142,7 @@ def create_webserver(
             tls=[
                 client.V1IngressTLS(
                     hosts=[ingress_spec["host"]],
-                    secret_name=ingress_spec.get(
-                        "tlsSecretName", f"{name}-tls"
-                    ),
+                    secret_name=ingress_spec.get("tlsSecretName", f"{name}-tls"),
                 )
             ]
             if ingress_spec.get("tls", True)
@@ -154,11 +151,11 @@ def create_webserver(
     )
     networking_v1.create_namespaced_ingress(namespace, ingress)
     logger.info(f"Created ingress for {name}")
-    
+
     # Build URL
     protocol = "https" if ingress_spec.get("tls", True) else "http"
     url = f"{protocol}://{ingress_spec['host']}"
-    
+
     return {"message": f"FreqtradeWebserver {name} created", "url": url}
 
 

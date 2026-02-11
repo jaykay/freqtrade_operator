@@ -7,12 +7,12 @@ spec:
   exchange:
     name: binance
     dryRun: true
-  
+
   stake:
     currency: USDT
     amount: "50"
     strategy: limited
-  
+
   # Multiple strategies with weighted allocation
   strategies:
     - name: strategy-a
@@ -22,7 +22,7 @@ spec:
         path: strategies/StrategyA.py
         sshKeySecret: git-ssh-key
       weight: 2  # This strategy gets 2x allocation
-    
+
     - name: strategy-b
       gitRepository:
         url: git@github.com:yourorg/trading-strategies.git
@@ -30,15 +30,15 @@ spec:
         path: strategies/StrategyB.py
         sshKeySecret: git-ssh-key
       weight: 1
-  
+
   apiServer:
     enabled: true
     verbosity: debug
-  
+
   webhooks:
     - url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
       events: ["*"]
-  
+
   resources:
     requests:
       cpu: "200m"

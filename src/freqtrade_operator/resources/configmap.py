@@ -12,14 +12,14 @@ def generate_freqtrade_config(
     database_url: str,
 ) -> dict[str, Any]:
     """Generate Freqtrade configuration from FreqtradeBot spec.
-    
+
     Args:
         name: Bot instance name
         namespace: Namespace
         spec: FreqtradeBot spec
         api_port: Assigned API server port
         database_url: PostgreSQL connection URL
-    
+
     Returns:
         Complete Freqtrade configuration dict
     """
@@ -28,15 +28,17 @@ def generate_freqtrade_config(
     strategies = spec.get("strategies", [])
     api_server_config = spec.get("apiServer", {})
     webhooks = spec.get("webhooks", [])
-    
+
     # Build strategy list
     strategy_list = []
     for strategy in strategies:
-        strategy_path = f"/strategies/{strategy['name']}/current/{strategy['gitRepository']['path']}"
+        strategy_path = (
+            f"/strategies/{strategy['name']}/current/{strategy['gitRepository']['path']}"
+        )
         weight = strategy.get("weight", 1)
         for _ in range(weight):
             strategy_list.append(strategy_path)
-    
+
     config = {
         "max_open_trades": 3,
         "stake_currency": stake_config["currency"],
@@ -45,7 +47,6 @@ def generate_freqtrade_config(
         "fiat_display_currency": "USD",
         "dry_run": exchange_config.get("dryRun", True),
         "cancel_open_orders_on_exit": False,
-        
         # Pricing
         "entry_pricing": {
             "price_side": "same",
@@ -62,7 +63,6 @@ def generate_freqtrade_config(
             "use_order_book": True,
             "order_book_top": 1,
         },
-
         # Exchange configuration
         "exchange": {
             "name": exchange_config["name"],
@@ -73,18 +73,14 @@ def generate_freqtrade_config(
             "pair_whitelist": [],
             "pair_blacklist": [],
         },
-        
         # Pairlists
         "pairlists": [
             {"method": "StaticPairList"},
         ],
-
         # Database
         "db_url": database_url,
-        
         # Strategy
         "strategy_list": strategy_list,
-        
         # API Server
         "api_server": {
             "enabled": api_server_config.get("enabled", True),
@@ -96,7 +92,6 @@ def generate_freqtrade_config(
             "jwt_secret_key": "${JWT_SECRET_KEY}",
             "CORS_origins": [],
         },
-        
         # Webhooks
         "webhook": {
             "enabled": len(webhooks) > 0,
@@ -110,7 +105,7 @@ def generate_freqtrade_config(
             ],
         },
     }
-    
+
     return config
 
 
@@ -123,7 +118,7 @@ def create_configmap(
     owner_references: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Create ConfigMap resource for Freqtrade configuration.
-    
+
     Args:
         name: Bot instance name
         namespace: Namespace
@@ -131,12 +126,12 @@ def create_configmap(
         api_port: Assigned API server port
         database_url: Database connection URL
         owner_references: Owner references for garbage collection
-    
+
     Returns:
         ConfigMap resource dict
     """
     config = generate_freqtrade_config(name, namespace, spec, api_port, database_url)
-    
+
     return {
         "apiVersion": "v1",
         "kind": "ConfigMap",

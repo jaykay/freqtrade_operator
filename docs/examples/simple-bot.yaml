@@ -8,12 +8,12 @@ spec:
     name: binance
     dryRun: true  # Paper trading mode
     # apiKeySecret: binance-api-keys  # Uncomment for real trading
-  
+
   stake:
     currency: USDT
     amount: "100"
     strategy: limited
-  
+
   strategies:
     - name: sample-strategy
       gitRepository:
@@ -21,11 +21,11 @@ spec:
         branch: main
         path: strategies/SampleStrategy.py
       weight: 1
-  
+
   apiServer:
     enabled: true
     verbosity: info
-  
+
   resources:
     requests:
       cpu: "100m"
