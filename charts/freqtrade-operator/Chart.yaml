@@ -12,6 +12,8 @@ keywords:
 home: https://github.com/yourorg/freqtrade-operator
 sources:
   - https://github.com/yourorg/freqtrade-operator
+annotations:
+  artifacthub.io/license: MIT
 maintainers:
   - name: Your Name
     email: your.email@example.com

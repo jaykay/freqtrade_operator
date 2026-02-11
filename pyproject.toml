@@ -3,7 +3,7 @@ name = "freqtrade-operator"
 version = "0.1.0"
 description = "Kubernetes operator for managing Freqtrade trading bot instances"
 readme = "README.md"
-requires-python = ">=3.11"
+license = {text = "MIT"}
 dependencies = [
     "kopf>=1.37",
     "kubernetes>=28.0",
