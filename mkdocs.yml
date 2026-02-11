@@ -1,0 +1,37 @@
+site_name: Freqtrade Operator
+site_url: https://your-username.github.io/freqtrade-operator
+repo_url: https://github.com/your-username/freqtrade-operator
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quickstart: quickstart.md
+  - User Guide:
+    - Strategies: strategies.md
+    - Configuration: configuration.md
+  - Reference:
+    - CRDs: reference/crds.md
+    - Helm Chart: reference/helm.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true

@@ -1,0 +1,67 @@
+apiVersion: trading.freqtrade.io/v1alpha1
+kind: FreqtradeWebserver
+metadata:
+  name: trading-ui
+  namespace: freqtrade-bots
+spec:
+  ingress:
+    host: freqtrade.example.com
+    tls: true
+    tlsSecretName: freqtrade-tls
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  
+  authentication:
+    enabled: true
+    jwtSecretRef: frequi-jwt-secret
+  
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+---
+# Production bot with real trading (dry-run: false)
+apiVersion: trading.freqtrade.io/v1alpha1
+kind: FreqtradeBot
+metadata:
+  name: prod-bot
+  namespace: freqtrade-bots
+spec:
+  exchange:
+    name: binance
+    dryRun: false  # !!! REAL TRADING !!!
+    apiKeySecret: binance-prod-keys
+  
+  stake:
+    currency: USDT
+    amount: "100"
+    strategy: limited
+  
+  strategies:
+    - name: production-strategy
+      gitRepository:
+        url: git@github.com:yourorg/prod-strategies.git
+        branch: production
+        path: strategies/ProdStrategy.py
+        sshKeySecret: git-ssh-key
+      weight: 1
+  
+  apiServer:
+    enabled: true
+    verbosity: info
+  
+  webhooks:
+    - url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+      events: ["buy", "sell", "buy_cancel", "sell_cancel"]
+  
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"

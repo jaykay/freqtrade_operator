@@ -1,0 +1,35 @@
+apiVersion: trading.freqtrade.io/v1alpha1
+kind: FreqtradeBot
+metadata:
+  name: simple-bot
+  namespace: freqtrade-bots
+spec:
+  exchange:
+    name: binance
+    dryRun: true  # Paper trading mode
+    # apiKeySecret: binance-api-keys  # Uncomment for real trading
+  
+  stake:
+    currency: USDT
+    amount: "100"
+    strategy: limited
+  
+  strategies:
+    - name: sample-strategy
+      gitRepository:
+        url: https://github.com/freqtrade/freqtrade-strategies.git
+        branch: main
+        path: strategies/SampleStrategy.py
+      weight: 1
+  
+  apiServer:
+    enabled: true
+    verbosity: info
+  
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"

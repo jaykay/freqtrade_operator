@@ -1,0 +1,130 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: freqtradewebservers.trading.freqtrade.io
+spec:
+  group: trading.freqtrade.io
+  names:
+    kind: FreqtradeWebserver
+    listKind: FreqtradeWebserverList
+    plural: freqtradewebservers
+    singular: freqtradewebserver
+    shortNames:
+      - ftws
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: [ingress]
+              properties:
+                # Ingress configuration
+                ingress:
+                  type: object
+                  required: [host]
+                  properties:
+                    host:
+                      type: string
+                      description: Hostname for the webserver
+                    tls:
+                      type: boolean
+                      default: true
+                      description: Enable TLS
+                    tlsSecretName:
+                      type: string
+                      description: Name of TLS secret
+                    annotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                      description: Ingress annotations
+                
+                # Authentication
+                authentication:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                      description: Enable authentication
+                    jwtSecretRef:
+                      type: string
+                      description: Secret containing JWT secret key
+                
+                # Resources
+                resources:
+                  type: object
+                  properties:
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          default: "100m"
+                        memory:
+                          type: string
+                          default: "128Mi"
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          default: "500m"
+                        memory:
+                          type: string
+                          default: "256Mi"
+            
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  description: Current phase
+                url:
+                  type: string
+                  description: Full URL to access the webserver
+                registeredBots:
+                  type: array
+                  items:
+                    type: string
+                  description: List of registered bot names
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      message:
+                        type: string
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: URL
+          type: string
+          jsonPath: .status.url
+          description: Webserver URL
+        - name: Bots
+          type: integer
+          jsonPath: .status.registeredBots
+          description: Number of registered bots
+        - name: Status
+          type: string
+          jsonPath: .status.phase
+          description: Current phase
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp

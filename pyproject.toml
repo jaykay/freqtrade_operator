@@ -1,0 +1,75 @@
+[project]
+name = "freqtrade-operator"
+version = "0.1.0"
+description = "Kubernetes operator for managing Freqtrade trading bot instances"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "kopf>=1.37",
+    "kubernetes>=28.0",
+    "opentelemetry-api>=1.21",
+    "opentelemetry-sdk>=1.21",
+    "opentelemetry-exporter-otlp>=1.21",
+    "opentelemetry-instrumentation>=0.42b0",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-asyncio>=0.21",
+    "pytest-kubernetes>=0.3",
+    "ruff>=0.1",
+    "mypy>=1.7",
+    "types-pyyaml",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+[tool.semantic_release]
+version_variable = [
+    "src/freqtrade_operator/__init__.py:__version__",
+]
+version_toml = ["pyproject.toml:project.version"]
+branch = "main"
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install build && python -m build"
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+    '''chor.*?''',
+    '''ci.*?''',
+    '''docs.*?''',
+    '''refactor.*?''',
+    '''style.*?''',
+    '''test.*?''',
+    '''Bump version.*?'''
+]
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+

@@ -1,0 +1,217 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: freqtradebots.trading.freqtrade.io
+spec:
+  group: trading.freqtrade.io
+  names:
+    kind: FreqtradeBot
+    listKind: FreqtradeBotList
+    plural: freqtradebots
+    singular: freqtradebot
+    shortNames:
+      - ftbot
+      - ftbots
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: [exchange, stake]
+              properties:
+                # Exchange configuration
+                exchange:
+                  type: object
+                  required: [name]
+                  properties:
+                    name:
+                      type: string
+                      description: Exchange name (e.g., binance, kraken)
+                    apiKeySecret:
+                      type: string
+                      description: Name of secret containing API credentials
+                    dryRun:
+                      type: boolean
+                      default: true
+                      description: Enable Freqtrade dry-run mode for paper trading
+                
+                # Stake configuration
+                stake:
+                  type: object
+                  required: [currency, amount]
+                  properties:
+                    currency:
+                      type: string
+                      description: Stake currency (e.g., USDT, BTC)
+                    amount:
+                      type: string
+                      description: Stake amount per trade
+                    strategy:
+                      type: string
+                      enum: [unlimited, limited]
+                      default: limited
+                      description: Stake strategy
+                
+                # Strategy configuration
+                strategies:
+                  type: array
+                  minItems: 1
+                  description: List of strategies to run
+                  items:
+                    type: object
+                    required: [name, gitRepository]
+                    properties:
+                      name:
+                        type: string
+                        description: Strategy name
+                      gitRepository:
+                        type: object
+                        required: [url, path]
+                        properties:
+                          url:
+                            type: string
+                            description: Git repository URL
+                          path:
+                            type: string
+                            description: Path to strategy file within repo
+                          branch:
+                            type: string
+                            default: main
+                            description: Git branch to use
+                          sshKeySecret:
+                            type: string
+                            description: Name of secret containing SSH key for private repos
+                      weight:
+                        type: integer
+                        minimum: 1
+                        default: 1
+                        description: Strategy weight for multi-strategy allocation
+                
+                # API Server configuration
+                apiServer:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                      description: Enable API server
+                    verbosity:
+                      type: string
+                      enum: [error, info, debug]
+                      default: info
+                      description: API server verbosity level
+                
+                # Webhook configuration
+                webhooks:
+                  type: array
+                  description: Webhook endpoints for notifications
+                  items:
+                    type: object
+                    required: [url]
+                    properties:
+                      url:
+                        type: string
+                        description: Webhook URL
+                      events:
+                        type: array
+                        items:
+                          type: string
+                        description: Events to trigger webhook
+                      secretRef:
+                        type: string
+                        description: Secret for webhook authentication
+                
+                # Resources
+                resources:
+                  type: object
+                  properties:
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          default: "100m"
+                        memory:
+                          type: string
+                          default: "256Mi"
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          default: "500m"
+                        memory:
+                          type: string
+                          default: "512Mi"
+                
+                # Dry-run mode for operator validation
+                dryRun:
+                  type: boolean
+                  default: false
+                  description: Operator dry-run mode - validate without deploying
+            
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  description: Current phase (Pending, Running, Failed, etc.)
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                observedGeneration:
+                  type: integer
+                  description: Last observed generation of the resource
+                lastBacktest:
+                  type: string
+                  format: date-time
+                  description: Timestamp of last backtest
+                tradingActive:
+                  type: boolean
+                  description: Whether trading is currently active
+                strategiesLoaded:
+                  type: array
+                  items:
+                    type: string
+                  description: List of successfully loaded strategies
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Exchange
+          type: string
+          jsonPath: .spec.exchange.name
+          description: Exchange name
+        - name: Strategies
+          type: string
+          jsonPath: .status.strategiesLoaded
+          description: Loaded strategies
+        - name: Status
+          type: string
+          jsonPath: .status.phase
+          description: Current phase
+        - name: Trading
+          type: boolean
+          jsonPath: .status.tradingActive
+          description: Trading active
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp

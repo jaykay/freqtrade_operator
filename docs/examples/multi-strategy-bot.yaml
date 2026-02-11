@@ -1,0 +1,61 @@
+apiVersion: trading.freqtrade.io/v1alpha1
+kind: FreqtradeBot
+metadata:
+  name: multi-strategy-bot
+  namespace: freqtrade-bots
+spec:
+  exchange:
+    name: binance
+    dryRun: true
+  
+  stake:
+    currency: USDT
+    amount: "50"
+    strategy: limited
+  
+  # Multiple strategies with weighted allocation
+  strategies:
+    - name: strategy-a
+      gitRepository:
+        url: git@github.com:yourorg/trading-strategies.git
+        branch: main
+        path: strategies/StrategyA.py
+        sshKeySecret: git-ssh-key
+      weight: 2  # This strategy gets 2x allocation
+    
+    - name: strategy-b
+      gitRepository:
+        url: git@github.com:yourorg/trading-strategies.git
+        branch: main
+        path: strategies/StrategyB.py
+        sshKeySecret: git-ssh-key
+      weight: 1
+  
+  apiServer:
+    enabled: true
+    verbosity: debug
+  
+  webhooks:
+    - url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+      events: ["*"]
+  
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+---
+# SSH key secret for private Git repository
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-ssh-key
+  namespace: freqtrade-bots
+type: Opaque
+stringData:
+  ssh-privatekey: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    # Add your SSH private key here
+    -----END OPENSSH PRIVATE KEY-----
