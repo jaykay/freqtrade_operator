@@ -39,8 +39,8 @@ COPY src/ /app/src/
 # Create non-root user (using existing operator group)
 # Note: we don't need to copy the operator group if it's already in the base image,
 # but python:slim doesn't have it by default.
-RUN groupadd -g 1000 operator || true && \
-    useradd -m -u 1000 -g 1000 operator && \
+RUN if ! getent group operator; then groupadd -g 1000 operator; fi && \
+    if ! getent passwd operator; then useradd -m -u 1000 -g operator operator; fi && \
     chown -R operator:operator /app
 
 USER operator
