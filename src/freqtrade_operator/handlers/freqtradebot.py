@@ -6,14 +6,15 @@ import string
 from typing import Any
 
 import kopf
+from kubernetes import client
+from kubernetes.client.rest import ApiException
+
 from freqtrade_operator.resources.configmap import create_configmap
 from freqtrade_operator.resources.database import (
     create_database,
     get_database_connection_string,
 )
 from freqtrade_operator.resources.deployment import create_deployment
-from kubernetes import client
-from kubernetes.client.rest import ApiException
 
 logger = logging.getLogger(__name__)
 

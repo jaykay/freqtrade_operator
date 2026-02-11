@@ -4,8 +4,9 @@ import logging
 import os
 
 import kopf
-from freqtrade_operator.observability.otel import create_operator_metrics, setup_opentelemetry
 from kubernetes import config
+
+from freqtrade_operator.observability.otel import create_operator_metrics, setup_opentelemetry
 
 # Configure logging
 logging.basicConfig(
