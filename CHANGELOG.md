@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.5.1 (2026-02-12)
+
+### Bug Fixes
+
+- Add persistentvolumeclaims to operator RBAC permissions
+  ([`aae8536`](https://github.com/jaykay/freqtrade_operator/commit/aae853660bd385389aafc9581fb557f53c28180c))
+
+The operator needs permission to create PVCs in bot namespaces for the user data persistence feature
+  added in #4.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.5.0 (2026-02-12)
 
 ### Features
