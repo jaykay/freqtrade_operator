@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.5.0 (2026-02-12)
+
+### Features
+
+- Make PostgreSQL optional, default to SQLite for dev setups
+  ([`20d828d`](https://github.com/jaykay/freqtrade_operator/commit/20d828d927310395d985e767532d9a8dc180feef))
+
+Add a `database` field to the CRD with `type` (sqlite/postgresql), defaulting to sqlite. PostgreSQL
+  via CNPG is only provisioned when explicitly configured. This removes the hard dependency on CNPG
+  for local development.
+
+Closes #3
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.4.0 (2026-02-12)
 
 ### Features
