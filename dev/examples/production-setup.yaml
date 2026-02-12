@@ -50,6 +50,14 @@ spec:
         sshKeySecret: git-ssh-key
       weight: 1
 
+  database:
+    type: postgresql
+    postgresql:
+      clusterName: freqtrade-db
+
+  storage:
+    size: "5Gi"
+
   apiServer:
     enabled: true
     verbosity: info
