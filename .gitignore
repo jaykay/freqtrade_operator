@@ -16,6 +16,9 @@ venv/
 *.swo
 *~
 
+# Linting
+.ruff_cache/
+
 # Testing
 .pytest_cache/
 .coverage
