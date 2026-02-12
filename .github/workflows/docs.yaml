@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Configure Git Credentials
         run: |
           git config user.name github-actions[bot]
@@ -33,5 +35,5 @@ jobs:
             mkdocs-material-
       - name: Install uv
         uses: astral-sh/setup-uv@v3
-      - run: uv pip install --system mkdocs-material
-      - run: mkdocs gh-deploy --force
+      - run: uv pip install --system mkdocs-material mike
+      - run: mike deploy --push --update-aliases dev
