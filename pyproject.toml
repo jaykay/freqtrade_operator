@@ -1,6 +1,6 @@
 [project]
 name = "freqtrade-operator"
-version = "0.1.0"
+version = "0.2.0"
 description = "Kubernetes operator for managing Freqtrade trading bot instances"
 readme = "README.md"
 requires-python = ">=3.11"

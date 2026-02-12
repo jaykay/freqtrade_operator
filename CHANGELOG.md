@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.0 (2026-02-12)
+
+### Bug Fixes
+
+- Correct cache key syntax in docs workflow and update chart-release dependencies
+  ([`963fe9d`](https://github.com/jaykay/freqtrade_operator/commit/963fe9d35ca2d28964c7e9b2ba8a4d8ebd901aa5))
+
+### Features
+
+- Enhance documentation workflow and dependencies for MkDocs
+  ([`928de76`](https://github.com/jaykay/freqtrade_operator/commit/928de76a70b9de790efb5e9c1c7ae8b6d1f619c7))
+
+
 ## v0.1.0 (2026-02-12)
 
 ### Bug Fixes
