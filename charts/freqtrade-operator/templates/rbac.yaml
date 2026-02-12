@@ -16,7 +16,7 @@ rules:
     verbs: ["get", "patch", "update"]
   # Core resources
   - apiGroups: [""]
-    resources: ["configmaps", "secrets", "services"]
+    resources: ["configmaps", "secrets", "services", "persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
