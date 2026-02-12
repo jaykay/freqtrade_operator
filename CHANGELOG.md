@@ -1,6 +1,23 @@
 # CHANGELOG
 
 
+## v0.4.0 (2026-02-12)
+
+### Features
+
+- Persist user data with PVCs and bootstrap userdir via init container
+  ([`7d7765c`](https://github.com/jaykay/freqtrade_operator/commit/7d7765c04c6970f4a83495d496c7905458c58281))
+
+Replace emptyDir with a PersistentVolumeClaim for the user_data volume so data survives pod
+  restarts. An init container runs `freqtrade create-userdir` to bootstrap the directory structure
+  on first start. Adds an optional `storage` field to the CRD for configuring PVC size and
+  storageClass.
+
+Closes #4
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.3.1 (2026-02-12)
 
 ### Bug Fixes
