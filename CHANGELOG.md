@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.3.1 (2026-02-12)
+
+### Bug Fixes
+
+- Add explicit namespace to ServiceAccount and Deployment templates
+  ([`c1f4349`](https://github.com/jaykay/freqtrade_operator/commit/c1f4349e96cf118c55042837c3ff5042e34c9574))
+
+Helm template rendering does not inject namespace into resource metadata, causing the ServiceAccount
+  to be created in the wrong namespace when deployed via Tilt or other template-based tools.
+
+Closes #2
+
+
 ## v0.3.0 (2026-02-12)
 
 ### Features
