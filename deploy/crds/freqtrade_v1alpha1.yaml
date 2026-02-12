@@ -130,6 +130,25 @@ spec:
                         type: string
                         description: Secret for webhook authentication
 
+                # Database configuration
+                database:
+                  type: object
+                  description: Database configuration for trade data
+                  properties:
+                    type:
+                      type: string
+                      enum: [sqlite, postgresql]
+                      default: sqlite
+                      description: Database type (sqlite for dev, postgresql for production)
+                    postgresql:
+                      type: object
+                      description: PostgreSQL settings (only used when type is postgresql)
+                      properties:
+                        clusterName:
+                          type: string
+                          default: freqtrade-db
+                          description: CloudNativePG cluster name
+
                 # Storage
                 storage:
                   type: object

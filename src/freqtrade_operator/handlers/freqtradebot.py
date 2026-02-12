@@ -55,7 +55,6 @@ def create_freqtradebot(
     # Create Kubernetes API clients
     core_v1 = client.CoreV1Api()
     apps_v1 = client.AppsV1Api()
-    custom_api = client.CustomObjectsApi()
 
     # Owner reference for garbage collection
     owner_references = [
@@ -87,12 +86,18 @@ def create_freqtradebot(
         core_v1.create_namespaced_secret(namespace=namespace, body=api_secret_dict)
         logger.info(f"Created API secret for {name}")
 
-        # 2. Create database (CNPG)
-        cluster_name = "freqtrade-db"  # Default cluster name
-        database_name = name.replace("-", "_")
+        # 2. Configure database
+        db_config = spec.get("database", {})
+        db_type = db_config.get("type", "sqlite")
+        api_port = assign_api_port(name)
 
-        db_resource = create_database(name, namespace, cluster_name, owner_references)
-        try:
+        if db_type == "postgresql":
+            pg_config = db_config.get("postgresql", {})
+            cluster_name = pg_config.get("clusterName", "freqtrade-db")
+            database_name = name.replace("-", "_")
+
+            db_resource = create_database(name, namespace, cluster_name, owner_references)
+            custom_api = client.CustomObjectsApi()
             custom_api.create_namespaced_custom_object(
                 group="postgresql.cnpg.io",
                 version="v1",
@@ -101,18 +106,12 @@ def create_freqtradebot(
                 body=db_resource,
             )
             logger.info(f"Created database {database_name} for {name}")
-        except ApiException as e:
-            if e.status == 404:
-                logger.warning(
-                    f"CNPG not installed, skipping database creation for {name}. "
-                    "Bot will use SQLite."
-                )
-            else:
-                raise
+            db_url = get_database_connection_string(cluster_name, namespace, database_name)
+        else:
+            db_url = "sqlite:////freqtrade/user_data/tradesv3.sqlite"
+            logger.info(f"Using SQLite database for {name}")
 
-        # 3. Assign API port and create ConfigMap
-        api_port = assign_api_port(name)
-        db_url = get_database_connection_string(cluster_name, namespace, database_name)
+        # 3. Create ConfigMap
 
         configmap_dict = create_configmap(name, namespace, spec, api_port, db_url, owner_references)
         kopf.adopt(configmap_dict, owner=kwargs.get("body"))
@@ -225,9 +224,16 @@ def update_freqtradebot(
     ]
 
     api_port = assign_api_port(name)
-    cluster_name = "freqtrade-db"
-    database_name = name.replace("-", "_")
-    db_url = get_database_connection_string(cluster_name, namespace, database_name)
+    db_config = spec.get("database", {})
+    db_type = db_config.get("type", "sqlite")
+
+    if db_type == "postgresql":
+        pg_config = db_config.get("postgresql", {})
+        cluster_name = pg_config.get("clusterName", "freqtrade-db")
+        database_name = name.replace("-", "_")
+        db_url = get_database_connection_string(cluster_name, namespace, database_name)
+    else:
+        db_url = "sqlite:////freqtrade/user_data/tradesv3.sqlite"
 
     try:
         # Reconcile ConfigMap
