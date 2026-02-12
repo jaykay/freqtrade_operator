@@ -24,6 +24,7 @@ nav:
   - Reference:
     - CRDs: reference/crds.md
     - Helm Chart: reference/helm.md
+  - Changelog: changelog.md
 
 plugins:
   - search
