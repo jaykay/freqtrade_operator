@@ -48,7 +48,7 @@ jobs:
           echo "released=$(if [ -f .released ]; then echo true; else echo false; fi)" >> $GITHUB_OUTPUT
           # This is simplified; the official action handles outputs better but uv run is more direct.
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to the Container registry
         if: steps.semantic.outputs.released == 'true'
