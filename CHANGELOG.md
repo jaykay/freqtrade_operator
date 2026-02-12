@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.3.0 (2026-02-12)
+
+### Features
+
+- Use built-in SampleStrategy for simple-bot, make gitRepository optional
+  ([`f2ee1ad`](https://github.com/jaykay/freqtrade_operator/commit/f2ee1ad639f8d4d3d3671175ab137ba87dd9cd28))
+
+Make gitRepository optional in the strategy CRD so bots can use freqtrade's built-in strategies
+  without a git-sync sidecar. The update handler now fully reconciles the ConfigMap and Deployment
+  on spec changes.
+
+Closes #1
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.0 (2026-02-12)
 
 ### Bug Fixes
