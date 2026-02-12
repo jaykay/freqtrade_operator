@@ -156,7 +156,9 @@ def create_deployment(
         },
         {
             "name": "data",
-            "emptyDir": {},
+            "persistentVolumeClaim": {
+                "claimName": f"{name}-data",
+            },
         },
     ]
 
@@ -200,6 +202,24 @@ def create_deployment(
                     },
                 },
                 "spec": {
+                    "initContainers": [
+                        {
+                            "name": "init-userdir",
+                            "image": "freqtradeorg/freqtrade:stable",
+                            "command": ["freqtrade"],
+                            "args": [
+                                "create-userdir",
+                                "--userdir",
+                                "/freqtrade/user_data",
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "name": "data",
+                                    "mountPath": "/freqtrade/user_data",
+                                },
+                            ],
+                        },
+                    ],
                     "containers": containers,
                     "volumes": volumes,
                     "securityContext": {

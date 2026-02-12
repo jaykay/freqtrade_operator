@@ -130,6 +130,19 @@ spec:
                         type: string
                         description: Secret for webhook authentication
 
+                # Storage
+                storage:
+                  type: object
+                  description: Persistent storage for user data
+                  properties:
+                    size:
+                      type: string
+                      default: "1Gi"
+                      description: Storage size for user data PVC
+                    storageClassName:
+                      type: string
+                      description: StorageClass name (uses cluster default if omitted)
+
                 # Resources
                 resources:
                   type: object

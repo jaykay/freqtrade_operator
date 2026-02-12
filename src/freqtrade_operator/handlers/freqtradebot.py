@@ -123,7 +123,32 @@ def create_freqtradebot(
         )
         logger.info(f"Created ConfigMap for {name}")
 
-        # 4. Create Deployment using kopf.adopt for owner references
+        # 4. Create PVC for user data persistence
+        storage_config = spec.get("storage", {})
+        pvc_dict = {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "name": f"{name}-data",
+                "namespace": namespace,
+                "labels": {"app": "freqtrade", "bot": name},
+            },
+            "spec": {
+                "accessModes": ["ReadWriteOnce"],
+                "resources": {
+                    "requests": {
+                        "storage": storage_config.get("size", "1Gi"),
+                    }
+                },
+            },
+        }
+        if "storageClassName" in storage_config:
+            pvc_dict["spec"]["storageClassName"] = storage_config["storageClassName"]
+        kopf.adopt(pvc_dict, owner=kwargs.get("body"))
+        core_v1.create_namespaced_persistent_volume_claim(namespace=namespace, body=pvc_dict)
+        logger.info(f"Created PVC for {name}")
+
+        # 5. Create Deployment using kopf.adopt for owner references
         deployment_dict = create_deployment(name, namespace, spec, api_port, owner_references)
 
         # Use kopf.adopt to set owner references properly
@@ -136,7 +161,7 @@ def create_freqtradebot(
         )
         logger.info(f"Created Deployment for {name}")
 
-        # 5. Create Service
+        # 6. Create Service
         service_dict = {
             "apiVersion": "v1",
             "kind": "Service",

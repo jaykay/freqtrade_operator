@@ -18,6 +18,9 @@ spec:
     - name: SampleStrategy
       className: SampleStrategy
 
+  storage:
+    size: "1Gi"
+
   apiServer:
     enabled: true
     verbosity: info
