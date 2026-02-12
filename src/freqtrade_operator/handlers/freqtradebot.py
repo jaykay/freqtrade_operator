@@ -177,42 +177,57 @@ def update_freqtradebot(
     spec: dict[str, Any],
     name: str,
     namespace: str,
+    meta: dict[str, Any],
     old: dict[str, Any],
     new: dict[str, Any],
     **kwargs: object,
 ) -> dict[str, str]:
-    """Handle FreqtradeBot updates."""
+    """Handle FreqtradeBot updates by reconciling ConfigMap and Deployment."""
     logger.info(f"Updating FreqtradeBot: {namespace}/{name}")
 
-    # Check if strategies changed
-    old_strategies = old.get("spec", {}).get("strategies", [])
-    new_strategies = spec.get("strategies", [])
+    core_v1 = client.CoreV1Api()
+    apps_v1 = client.AppsV1Api()
 
-    if old_strategies != new_strategies:
-        logger.info(f"Strategies changed for {name}, triggering rollout")
-        # ConfigMap update will trigger deployment rollout automatically
-        apps_v1 = client.AppsV1Api()
-        try:
-            # Restart deployment to pick up new strategies
-            apps_v1.patch_namespaced_deployment(
-                name=name,
-                namespace=namespace,
-                body={
-                    "spec": {
-                        "template": {
-                            "metadata": {
-                                "annotations": {
-                                    "kubectl.kubernetes.io/restartedAt": kwargs.get("status", {})
-                                    .get("create_fn", {})
-                                    .get("started", "now")
-                                }
-                            }
-                        }
-                    }
-                },
-            )
-        except ApiException as e:
-            logger.error(f"Failed to restart deployment {name}: {e}")
+    owner_references = [
+        {
+            "apiVersion": "trading.freqtrade.io/v1alpha1",
+            "kind": "FreqtradeBot",
+            "name": name,
+            "uid": meta["uid"],
+            "controller": True,
+            "blockOwnerDeletion": True,
+        }
+    ]
+
+    api_port = assign_api_port(name)
+    cluster_name = "freqtrade-db"
+    database_name = name.replace("-", "_")
+    db_url = get_database_connection_string(cluster_name, namespace, database_name)
+
+    try:
+        # Reconcile ConfigMap
+        configmap_dict = create_configmap(name, namespace, spec, api_port, db_url, owner_references)
+        kopf.adopt(configmap_dict, owner=kwargs.get("body"))
+        core_v1.replace_namespaced_config_map(
+            name=f"{name}-config",
+            namespace=namespace,
+            body=configmap_dict,
+        )
+        logger.info(f"Updated ConfigMap for {name}")
+
+        # Reconcile Deployment
+        deployment_dict = create_deployment(name, namespace, spec, api_port, owner_references)
+        kopf.adopt(deployment_dict, owner=kwargs.get("body"))
+        apps_v1.replace_namespaced_deployment(
+            name=name,
+            namespace=namespace,
+            body=deployment_dict,
+        )
+        logger.info(f"Updated Deployment for {name}")
+
+    except ApiException as e:
+        logger.error(f"Failed to update resources for {name}: {e}")
+        raise kopf.TemporaryError(f"Failed to update bot: {e}", delay=15)
 
     return {"message": f"FreqtradeBot {name} updated"}
 

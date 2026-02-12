@@ -65,11 +65,14 @@ spec:
                   description: List of strategies to run
                   items:
                     type: object
-                    required: [name, gitRepository]
+                    required: [name]
                     properties:
                       name:
                         type: string
                         description: Strategy name
+                      className:
+                        type: string
+                        description: Strategy class name. Required when not using gitRepository.
                       gitRepository:
                         type: object
                         required: [url, path]

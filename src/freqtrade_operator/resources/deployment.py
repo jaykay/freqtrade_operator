@@ -5,6 +5,22 @@ from typing import Any
 from freqtrade_operator.utils.git_sync import create_git_sync_container, create_ssh_key_volume
 
 
+def _build_freqtrade_args(strategies: list[dict[str, Any]]) -> list[str]:
+    """Build freqtrade command arguments from strategy configuration."""
+    args = ["trade", "--config", "/config/config.json"]
+
+    has_git_strategies = any("gitRepository" in s for s in strategies)
+    if has_git_strategies:
+        args.extend(["--strategy-path", "/strategies"])
+
+    if len(strategies) == 1:
+        strategy = strategies[0]
+        class_name = strategy.get("className", strategy["name"])
+        args.extend(["--strategy", class_name])
+
+    return args
+
+
 def create_deployment(
     name: str,
     namespace: str,
@@ -34,13 +50,7 @@ def create_deployment(
             "name": "freqtrade",
             "image": "freqtradeorg/freqtrade:stable",
             "command": ["freqtrade"],
-            "args": [
-                "trade",
-                "--config",
-                "/config/config.json",
-                "--strategy-path",
-                "/strategies",
-            ],
+            "args": _build_freqtrade_args(strategies),
             "env": [
                 {
                     "name": "EXCHANGE_API_KEY",
@@ -126,10 +136,11 @@ def create_deployment(
         }
     ]
 
-    # Add git-sync sidecar for each strategy
+    # Add git-sync sidecar only for strategies with a gitRepository
     for strategy in strategies:
-        git_sync_container = create_git_sync_container(strategy, volume_name="strategies")
-        containers.append(git_sync_container)
+        if "gitRepository" in strategy:
+            git_sync_container = create_git_sync_container(strategy, volume_name="strategies")
+            containers.append(git_sync_container)
 
     # Build volumes
     volumes = [

@@ -15,12 +15,8 @@ spec:
     strategy: limited
 
   strategies:
-    - name: sample-strategy
-      gitRepository:
-        url: https://github.com/freqtrade/freqtrade-strategies.git
-        branch: main
-        path: strategies/SampleStrategy.py
-      weight: 1
+    - name: SampleStrategy
+      className: SampleStrategy
 
   apiServer:
     enabled: true

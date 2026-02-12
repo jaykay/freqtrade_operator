@@ -32,9 +32,12 @@ def generate_freqtrade_config(
     # Build strategy list
     strategy_list = []
     for strategy in strategies:
-        strategy_path = (
-            f"/strategies/{strategy['name']}/current/{strategy['gitRepository']['path']}"
-        )
+        if "gitRepository" in strategy:
+            strategy_path = (
+                f"/strategies/{strategy['name']}/current/{strategy['gitRepository']['path']}"
+            )
+        else:
+            strategy_path = strategy.get("className", strategy["name"])
         weight = strategy.get("weight", 1)
         for _ in range(weight):
             strategy_list.append(strategy_path)
